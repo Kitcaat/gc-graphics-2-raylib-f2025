@@ -20,6 +20,8 @@ constexpr float PADDLE_SPEED = SCREEN_HEIGHT * 0.5f;
 constexpr float PADDLE_WIDTH = 40.0f;
 constexpr float PADDLE_HEIGHT = 80.0f;
 
+constexpr int maxScore = 5; 
+
 struct Box
 {
     float xMin;
@@ -70,7 +72,7 @@ void ResetBall(Vector2& position, Vector2& direction)
     position = CENTER;
     direction.x = rand() % 2 == 0 ? -1.0f : 1.0f;
     direction.y = 0.0f;
-    direction = Vector2Rotate(direction, Random(0.0f, 360.0f) * DEG2RAD);
+    direction = Vector2Rotate(direction, Random(0.0f, 80.0f)* DEG2RAD);
 }
 
 void DrawBall(Vector2 position, Color color)
@@ -97,6 +99,7 @@ int main()
     paddle1Position.y = paddle2Position.y = CENTER.y;
 
     int testScore = 0;
+    int testScore2 = 0;
 
     InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Pong");
     InitAudioDevice();
@@ -114,8 +117,11 @@ int main()
         if (IsKeyDown(KEY_S))
             paddle1Position.y += paddleDelta;
 
-        // Mirror paddle 1 for now
-        paddle2Position.y = paddle1Position.y;
+        if (IsKeyDown(KEY_UP))
+            paddle2Position.y -= paddleDelta;
+        if (IsKeyDown(KEY_DOWN))
+            paddle2Position.y += paddleDelta; 
+
 
         float phh = PADDLE_HEIGHT * 0.5f;
         paddle1Position.y = Clamp(paddle1Position.y, phh, SCREEN_HEIGHT - phh);
@@ -128,38 +134,75 @@ int main()
         Box paddle2Box = PaddleBox(paddle2Position);
 
         // TODO -- increment the scoring player's score after they've touched the ball and the ball goes too far right/left
-        testScore++;
-        if (ballBox.xMin < 0.0f || ballBox.xMax > SCREEN_WIDTH)
+        
+        if (ballBox.xMin < 0.0f )
+
         {
-            ballDirection.x *= -1.0f;
+            PlaySound(LoadSound("resources/PingPong.mp3")); //play sound when it hits the ball from one side
+            testScore++;
+            ResetBall(ballPosition, ballDirection);
+            
         }
+        
+        if (testScore>= maxScore)
+        {
+            BeginDrawing();
+            ClearBackground(BLACK);
+            DrawText("Player 1 wins!", SCREEN_WIDTH * 0.5f - MeasureText("Player 1 Wins!", 50) * 0.5f, SCREEN_HEIGHT * 0.5f - 30, 50, YELLOW);
+            DrawText("Press 'R' to Replay || Press 'Q' to Quit", SCREEN_WIDTH * 0.5F - MeasureText("Press 'R' to Replay || Press 'Q' to Quit", 50) * 0.5f, SCREEN_HEIGHT * 0.7f - 20, 20, YELLOW);
+            EndDrawing();
+        }
+
         if (ballBox.yMin < 0.0f || ballBox.yMax > SCREEN_HEIGHT)
         {
+            PlaySound(LoadSound("resources/PingPong.mp3"));
             ballDirection.y *= -1.0f;
         }
         if (BoxOverlap(ballBox, paddle1Box) || BoxOverlap(ballBox, paddle2Box))
         {
+            PlaySound(LoadSound("resources/PingPong.mp3"));
             ballDirection.x *= -1.0f;
         }
 
+        if (ballBox.xMax > SCREEN_WIDTH)
+           
+        {
+            PlaySound(LoadSound("resources/PingPong.mp3")); //play sound when the other ball hits
+            testScore2++;
+            ResetBall(ballPosition, ballDirection);
+        }
+        if (testScore2 >= maxScore)
+        {
+            BeginDrawing();
+            ClearBackground(BLACK);
+            DrawText("Player 2 wins!", SCREEN_WIDTH * 0.5f - MeasureText("Player 2 Wins!", 50) * 0.5f,SCREEN_HEIGHT * 0.5f - 30, 50, YELLOW);
+            DrawText("Game Over", SCREEN_WIDTH * 0.5F - MeasureText("Game Over", 50) * 0.5f, SCREEN_HEIGHT * 0.7f - 50, 20, YELLOW);
+            EndDrawing();
+        }
+        
         // Update ball position after collision resolution, then render
         ballPosition = ballPosition + ballDirection * ballDelta;
 
         BeginDrawing();
         ClearBackground(BLACK);
-        DrawBall(ballPosition, WHITE);
-        DrawPaddle(paddle1Position, WHITE);
-        DrawPaddle(paddle2Position, WHITE);
+        DrawBall(ballPosition, YELLOW);
+        DrawPaddle(paddle1Position, BLUE);
+        DrawPaddle(paddle2Position, RED);
 
         // Text format requires you to put a '%i' wherever you want an integer, then add said integer after the comma
         const char* testScoreText = TextFormat("Test Score: %i ", testScore);
+        const char* testScoreText2 = TextFormat("Test Score: %i ", testScore2);
 
         // We can measure our text for more exact positioning. This puts our score in the center of our screen!
-        DrawText(testScoreText, SCREEN_WIDTH * 0.5f - MeasureText(testScoreText, 20) * 0.5f, 50, 20, BLUE);
+        DrawText(testScoreText, SCREEN_WIDTH * 0.5f - MeasureText(testScoreText, 20) * 0.5f, 50, 20, RED);
+        DrawText(testScoreText2, SCREEN_WIDTH * 0.5f - MeasureText(testScoreText2, 20) * 0.5f, 100, 20, BLUE);
+        
         EndDrawing();
     }
+    BeginDrawing();
 
     CloseAudioDevice();
     CloseWindow();
     return 0;
 }
+
