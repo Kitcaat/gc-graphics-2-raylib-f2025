@@ -25,6 +25,23 @@ int main()
     {
         BeginDrawing();
         ClearBackground(WHITE);
+
+        for (int i = 0; i < 800; i += 80)
+        {
+            float size = 40.0f;
+
+            // Move this to the bottom of the screen
+            DrawRectangle(i, 50, size, size, BLUE); //Lines in the middle
+
+            DrawRectangle(i, 750, size, size, PINK); //Rectangles at the bottom 
+
+            // For vertical squares, use i as the y-coordinate, and set x to screen left (0) or screen right (750)
+
+            DrawRectangle(i, 0, size, size, RED );
+            
+            DrawRectangle(i, 0, size, size, GREEN);
+        }
+
         DrawText("Hello world!", 10, 10, 20, LIGHTGRAY);
         EndDrawing();
     }
