@@ -37,6 +37,10 @@ int main()
 
             // For vertical squares, use i as the y-coordinate, and set x to screen left (0) or screen right (750)
 
+            DrawRectangle(750, i, size, size, YELLOW);
+
+           
+
             DrawRectangle(i, 0, size, size, RED );
             
             DrawRectangle(i, 0, size, size, GREEN);
